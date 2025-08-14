@@ -1,0 +1,76 @@
+version: "3.9"
+
+services:
+  postgres-db:
+    image: postgres:15
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: uNchRItYRoth
+      POSTGRES_DB: postgres
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - server-net
+
+  redis-broker:
+    image: redis
+    container_name: redis-broker
+    networks:
+      - server-net
+
+  flask-service:
+    build:
+      context: flask-microservice
+    container_name: flask-service
+    volumes:
+      - .:/flask-microservice:/app
+    working_dir: /app
+    depends_on:
+      - postgres-db
+      - redis-broker
+    networks:
+      - server-net
+
+  spring-service:
+    build:
+      context: spring-microservice
+    container_name: spring-service
+    volumes:
+      - .:/uploads:/uploads
+      - .:/spring-microservice:/mediahub
+    working_dir: /mediahub
+    depends_on:
+      - redis-broker
+    networks:
+      - server-net
+
+  python-worker:
+    build:
+      context: flask-microservice/
+    container_name: redis-worker
+    command: python worker_redis.py
+    depends_on:
+      - postgres-db
+      - redis-broker
+    networks:
+      - server-net
+
+  gateway:
+    image: nginx:stable-perl
+    container_name: nginx-gateway
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - flask-service
+      - spring-service
+    networks:
+      - server-net
+
+volumes:
+  pgdata:
+
+networks:
+  server-net:
