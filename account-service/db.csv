@@ -1,0 +1,88 @@
+## Table: subscription_plan
+id: UUID PK
+plan_name: VARCHAR NOT NULL
+payment_methods: VARCHAR
+price: DECIMAL(10,2)
+
+## Table: user
+id: UUID PK
+first_name: VARCHAR NOT NULL
+last_name: VARCHAR NOT NULL
+birth_date: DATE NOT NULL
+created_at: TIMESTAMP
+last_login: TIMESTAMP
+subscription_plan_id: UUID FK → subscription_plan.id
+
+## Table: auth
+id: UUID PK
+user_id: UUID FK → user.id
+username: VARCHAR NOT NULL
+email: VARCHAR NOT NULL
+password: VARCHAR NOT NULL
+created_at: TIMESTAMP NOT NULL
+role: VARCHAR NOT NULL
+status: VARCHAR NOT NULL
+
+## Table: device
+id: UUID PK
+user_id: UUID FK → user.id
+device_brand: VARCHAR NOT NULL
+device_model: VARCHAR NOT NULL
+ip_address: VARCHAR
+last_used_at: TIMESTAMP
+
+## Table: genre
+id: UUID PK
+genre_name: VARCHAR NOT NULL
+
+## Table: serie
+id: UUID PK
+name: VARCHAR NOT NULL
+description: VARCHAR NOT NULL
+thumbnail_url: VARCHAR NOT NULL
+trailer_url: VARCHAR NOT NULL
+release_date: TIME NOT NULL
+
+## Table: season
+id: UUID PK
+serie_id: UUID FK → serie.id
+number_of_season: INT NOT NULL
+release_date: TIME NOT NULL
+
+## Table: content
+id: UUID PK
+title: VARCHAR NOT NULL
+description: VARCHAR NOT NULL
+release_date: DATE NOT NULL
+duration: VARCHAR NOT NULL
+thumbnail_file: VARCHAR NOT NULL
+content_file: VARCHAR NOT NULL
+trailer_file: VARCHAR
+created_at: TIMESTAMP NOT NULL
+updated_at: TIMESTAMP
+episode_number: INT
+season_id: UUID FK → season.id
+
+## Table: watch_history
+id: UUID PK
+user_id: UUID FK → user.id
+content_id: UUID FK → content.id
+watched_at: TIMESTAMP NOT NULL
+last_position: DOUBLE
+
+## Table: franchise
+id: UUID PK
+name: VARCHAR NOT NULL
+description: VARCHAR NOT NULL
+
+## Table: content_genre
+content_id: UUID FK → content.id
+genre_id: UUID FK → genre.id
+primary: BOOLEAN
+PRIMARY KEY (content_id, genre_id)
+
+## Table: content_franchise
+content_id: UUID FK → content.id
+franchise_id: UUID FK → franchise.id
+primary: BOOLEAN
+PRIMARY KEY (content_id, franchise_id)
