@@ -7,6 +7,7 @@ from app.models import Auth
 from app.exceptions.exceptions import NotFoundException, PasswordMismatchException
 from app.repositories.auth_repository import AuthRepository
 from app.utils.wrappers import ListWrapper
+from app.dtos import AuthInfo
 
 
 class AuthService(AbstractAuthImpl):
@@ -78,18 +79,18 @@ class AuthService(AbstractAuthImpl):
 
     def create_auth(
             self,
-            data: dict,
-            user_id: UUID,
+            account_id: UUID,
+            data: AuthInfo,
             session: Session = None,
             auto_commit: bool = True
     ) -> Auth:
-        auth = Auth(**data, user_id=user_id)
-        self.repository.create(
-            auth,
-            session,
-            auto_commit
+        auth_data = data.model_dump()
+        auth_data["account_id"] = account_id
+        
+        return self.repository.create(
+            Auth(**auth_data), session, auto_commit
         )
-        return auth
+
 
     def update_auth(
             self,

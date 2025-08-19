@@ -6,20 +6,20 @@ from flask_jwt_extended import create_access_token
 from app.dtos.login_dto import LoginDto
 
 auth_bl = Blueprint("auth", __name__, url_prefix="/auth")
-
 auth_service = AuthService()
 
 
 @auth_bl.post("/login")
 def login() -> tuple[Response, int]:
-    model = LoginDto.model_validate(request.get_json())
-    user = auth_service.get_auth(model.username, model.password, db())
+    valited_model = LoginDto.model_validate(request.get_json())
+    account = auth_service.get_auth(valited_model.username, 
+                                 valited_model.password, db())
     token = create_access_token(
-        identity=user.id,
+        identity=account.id,
         expires_delta=timedelta(days=2)
     )
 
     return jsonify({
         "access_token": token,
-        "data": user.as_json()
+        "data": account.as_json()
     }), 200

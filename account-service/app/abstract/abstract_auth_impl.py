@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlmodel import Session
 from app.models import Auth
 from app.utils.wrappers import ListWrapper
+from app.dtos import AuthInfo
 
 
 class AbstractAuthImpl(ABC):
@@ -10,8 +11,8 @@ class AbstractAuthImpl(ABC):
     @abstractmethod
     def create_auth(
             self,
-            data: dict,
-            user_id: UUID,
+            account_id: UUID,
+            data: AuthInfo,
             session: Session,
             auto_commit: bool = True
     ) -> Auth:

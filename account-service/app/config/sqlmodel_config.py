@@ -6,7 +6,7 @@ from app.utils.settings import get_settings
 
 settings = get_settings()
 
-engine = create_engine(settings.postgres_internal_url, echo=False)
+engine = create_engine(settings.postgres_local_url, echo=False)
 SQLModel.metadata.create_all(engine)
 
 

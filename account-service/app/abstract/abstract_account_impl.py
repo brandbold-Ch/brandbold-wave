@@ -1,57 +1,52 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 from sqlmodel import Session
-from app.models import Device
+from app.models import Account
 from app.utils.wrappers import ListWrapper
-from app.dtos import DeviceInfo
+from app.dtos import AccountInfo
 
 
-class AbstractDeviceImpl(ABC):
+class AbstractAccountImpl(ABC):
 
     @abstractmethod
-    def create_device(
+    def create_account(
             self,
-            account_id: UUID,
-            data: DeviceInfo,
+            data: AccountInfo,
             session: Session,
             auto_commit: bool = True
-    ) -> Device:
+    ) -> Account:
         pass
 
     @abstractmethod
-    def get_devices(
+    def get_accounts(
             self,
-            account_id: UUID,
             session: Session
     ) -> ListWrapper:
         pass
 
     @abstractmethod
-    def get_device(
+    def get_account(
             self,
             account_id: UUID,
-            device_id: UUID,
             session: Session
-    ) -> Device:
+    ) -> Account:
         pass
 
     @abstractmethod
-    def delete_device(
+    def delete_account(
             self,
             account_id: UUID,
-            device_id: UUID,
             session: Session,
             auto_commit: bool = True
-    ) -> Device:
+    ) -> Account:
         pass
 
     @abstractmethod
-    def update_device(
+    def update_account(
             self,
             account_id: UUID,
-            device_id: UUID,
             data: dict,
             session: Session,
             auto_commit: bool = True
-    ) -> Device:
+    ) -> Account:
         pass

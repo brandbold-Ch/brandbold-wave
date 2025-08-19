@@ -8,7 +8,7 @@ from app.models.base_model import EntityBaseModel
 
 class Device(EntityBaseModel, table=True):
     id: UUID = Field(default_factory=lambda: uuid4(), primary_key=True)
-    user_id: UUID = Field(foreign_key="user.id", nullable=False, ondelete="CASCADE")
+    account_id: UUID = Field(foreign_key="account.id", nullable=False, ondelete="CASCADE")
     device_brand: str
     device_model: str
     ip_address: str = Field(sa_column=Column(INET))

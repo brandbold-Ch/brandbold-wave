@@ -1,25 +1,25 @@
 from abc import ABC, abstractmethod
 from uuid import UUID
 from sqlmodel import Session
-from app.models import Device
+from app.models import Profile
 from app.utils.wrappers import ListWrapper
-from app.dtos import DeviceInfo
+from app.dtos import ProfileInfo
 
 
-class AbstractDeviceImpl(ABC):
+class AbstractProfileImpl(ABC):
 
     @abstractmethod
-    def create_device(
+    def create_profile(
             self,
             account_id: UUID,
-            data: DeviceInfo,
+            data: ProfileInfo,
             session: Session,
             auto_commit: bool = True
-    ) -> Device:
+    ) -> Profile:
         pass
 
     @abstractmethod
-    def get_devices(
+    def get_profiles(
             self,
             account_id: UUID,
             session: Session
@@ -27,31 +27,31 @@ class AbstractDeviceImpl(ABC):
         pass
 
     @abstractmethod
-    def get_device(
+    def get_profile(
             self,
             account_id: UUID,
-            device_id: UUID,
+            profile_id: UUID,
             session: Session
-    ) -> Device:
+    ) -> Profile:
         pass
 
     @abstractmethod
-    def delete_device(
+    def delete_profile(
             self,
             account_id: UUID,
-            device_id: UUID,
+            profile_id: UUID,
             session: Session,
             auto_commit: bool = True
-    ) -> Device:
+    ) -> Profile:
         pass
 
     @abstractmethod
-    def update_device(
+    def update_profile(
             self,
             account_id: UUID,
-            device_id: UUID,
+            profile_id: UUID,
             data: dict,
             session: Session,
             auto_commit: bool = True
-    ) -> Device:
+    ) -> Profile:
         pass

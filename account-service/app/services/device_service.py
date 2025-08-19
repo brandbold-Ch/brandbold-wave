@@ -4,6 +4,7 @@ from app.abstract import AbstractDeviceImpl
 from app.models import Device
 from app.repositories.device_repository import DeviceRepository
 from app.utils.wrappers import ListWrapper
+from app.dtos import DeviceInfo
 
 
 class DeviceService(AbstractDeviceImpl):
@@ -16,52 +17,55 @@ class DeviceService(AbstractDeviceImpl):
 
     def condition(
             self,
-            user_id: UUID,
+            account_id: UUID,
             device_id: UUID
     ) -> bool:
-        return ((Device.user_id == user_id) &
+        return ((Device.account_id == account_id) &
                 (Device.id == device_id))
 
     def create_device(
             self,
-            user_id: UUID,
-            data: dict,
+            account_id: UUID,
+            data: DeviceInfo,
             session: Session = None,
             auto_commit: bool = True
     ) -> Device:
-        device = Device(**data, user_id=user_id)
-        self.repository.create(device, session, auto_commit)
-        return device
+        device_data = data.model_dump()
+        device_data["account_id"] = account_id
+
+        return self.repository.create(
+            Device(**device_data), session, auto_commit
+        )
+
 
     def get_devices(
             self,
-            user_id: UUID,
+            account_id: UUID,
             session: Session
     ) -> ListWrapper:
-        result = self.repository.get_many(
-            Device.user_id == user_id,
+        return self.repository.get_many(
+            Device.account_id == account_id,
             session
         )
-        return result
 
     def get_device(
             self,
-            user_id: UUID,
+            account_id: UUID,
             device_id: UUID,
             session: Session
     ) -> Device:
-        condition = self.condition(user_id, device_id)
+        condition = self.condition(account_id, device_id)
         result = self.repository.get_one(condition, session)
         return result
 
     def delete_device(
             self,
-            user_id: UUID,
+            account_id: UUID,
             device_id: UUID,
             session: Session = None,
             auto_commit: bool = True
     ) -> Device:
-        condition = self.condition(user_id, device_id)
+        condition = self.condition(account_id, device_id)
         result = self.repository.delete_one(
             condition,
             session,
@@ -71,13 +75,13 @@ class DeviceService(AbstractDeviceImpl):
 
     def update_device(
             self,
-            user_id: UUID,
+            account_id: UUID,
             device_id: UUID,
             data: dict,
             session: Session = None,
             auto_commit: bool = True
     ) -> Device:
-        condition = self.condition(user_id, device_id)
+        condition = self.condition(account_id, device_id)
         result = self.repository.update_one(
             condition,
             data,

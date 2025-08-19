@@ -4,5 +4,5 @@ from app.repositories.base_repository import BaseRepository
 
 class AuthRepository(BaseRepository):
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(Auth)

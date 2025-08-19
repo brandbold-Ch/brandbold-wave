@@ -21,4 +21,4 @@ def serialize_objects(
     data: list[EntityBaseModel], 
     deep: bool
 ) -> list[dict]:
-    return [obj.as_json(deep) for obj in data]
+    return [model.as_json(deep) for model in data]

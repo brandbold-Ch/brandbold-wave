@@ -21,8 +21,8 @@ class BaseExceptionError(Exception):
         error_response = {
             "details": {
                 "message": self.message,
-                "HttpName": self.http_name,
-                "ErrorName": self.error_name,
+                "httpName": self.http_name,
+                "errorName": self.error_name,
             },
             "codes": {
                 "httpCode": self.http_code,
