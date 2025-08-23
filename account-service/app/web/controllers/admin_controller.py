@@ -1,23 +1,23 @@
+
+"""
+This module defines the admin blueprint and its routes for the admin dashboard and account management views.
+It provides endpoints for viewing, updating, and deleting user accounts, as well as rendering the admin dashboard.
+"""
 from app.services import AuthService, AccountService
 from app.config.sqlmodel_config import db
 from flask import (
-    Blueprint, 
     request, 
     render_template, 
+    Blueprint, 
     redirect, 
     url_for, 
     Response
 )
 
-
 admin_bl = Blueprint(
-    "admin", 
-    __name__, 
-    url_prefix="/admin", 
-    template_folder="../templates/admin"
+    "admin", __name__, url_prefix="/admin", template_folder="../templates/admin"
 )
   
-
 user_services = AccountService()
 auth_service = AuthService()
 
@@ -120,11 +120,23 @@ def content_streaming_view() -> str:
 
 @admin_bl.route("/", methods=["GET"])
 def dashboard_view() -> str:
+    """
+    Render the admin dashboard view.
+
+    Returns:
+        str: Rendered HTML for the dashboard.
+    """
     return render_template("dashboard_view.html")
 
 
 @admin_bl.route("/accounts", methods=["GET"])
 def accounts_view() -> str:
+    """
+    Render the accounts view with a list of user accounts.
+
+    Returns:
+        str: Rendered HTML for the accounts list.
+    """
     accounts = user_services.get_accounts(db())
     return render_template(
         "accounts_view.html",
@@ -134,11 +146,29 @@ def accounts_view() -> str:
 
 @admin_bl.route("/accounts/<uuid:account_id>", methods=["PUT"])
 def update_account(account_id) -> Response:
+    """
+    Update the authentication information for a specific account.
+
+    Args:
+        account_id (UUID): The unique identifier of the account to update.
+
+    Returns:
+        Response: Redirects to the accounts view after update.
+    """
     auth_service.update_auth(account_id, request.get_json(), db())
     return redirect(url_for("admin.accounts_view"))
-    
+
 
 @admin_bl.route("/accounts/<uuid:account_id>", methods=["DELETE"])
 def delete_account(account_id) -> Response:
+    """
+    Delete a specific user account.
+
+    Args:
+        account_id (UUID): The unique identifier of the account to delete.
+
+    Returns:
+        Response: Redirects to the accounts view after deletion.
+    """
     user_services.delete_account(account_id, db())
     return redirect(url_for("admin.accounts_view"))

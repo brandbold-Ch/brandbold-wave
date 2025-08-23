@@ -1,20 +1,19 @@
 from .login_dto import LoginDto
-from .profile_dto import ProfileInfo
+from .profile_dto import ProfileInfoDto, SecureProfileInfoDto
 from .account_dto import (
     CreateAccountDto, 
-    UpdateAccountDto, 
-    AccountInfo, 
-    AuthInfo, 
-    DeviceInfo
+    AccountInfoDto, 
+    AuthInfoDto, 
+    DeviceInfoDto
 )
 
 
 __all__ = [
     "CreateAccountDto",
-    "UpdateAccountDto",
-    "AccountInfo",
-    "AuthInfo",
-    "ProfileInfo",
-    "DeviceInfo",
-    "LoginDto"
+    "AccountInfoDto",
+    "AuthInfoDto",
+    "ProfileInfoDto",
+    "DeviceInfoDto",
+    "LoginDto", 
+    "SecureProfileInfoDto"
 ]

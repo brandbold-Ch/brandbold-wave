@@ -1,7 +1,14 @@
+"""
+Error and HTTP code enumerations for application exceptions.
+Defines HTTP status codes and custom error codes used throughout the application.
+"""
 from enum import Enum
 
 
 class HTTPCodes(Enum):
+    """
+    Enumeration of HTTP status codes for API responses.
+    """
     CONTINUE = 100
     SWITCHING_PROTOCOLS = 101
     PROCESSING = 102
@@ -69,6 +76,9 @@ class HTTPCodes(Enum):
 
 
 class ErrorCodes(Enum):
+    """
+    Enumeration of custom error codes for application-specific exceptions.
+    """
     NOT_FOUND_TOKEN = 11
     INVALID_TOKEN = 12
     PASSWORD_DO_NOT_MATCH = 13

@@ -109,13 +109,13 @@
         <tbody>
             {% for account in accounts %}
                 <tr>
-                    <td>{{ account.auth_data.username }}</td>
-                    <td>{{ account.auth_data.email }}</td>
-                    <td>{{ account.auth_data.created_at }}</td>
-                    <td>{{ account.auth_data.last_login }}</td>
+                    <td>{{ account.auth_info.username }}</td>
+                    <td>{{ account.auth_info.email }}</td>
+                    <td>{{ account.auth_info.created_at }}</td>
+                    <td>{{ account.auth_info.last_login }}</td>
                     <td>
                         <button class="btn-action" onclick="">Update</button>
-                        <button class="btn-action on deactivate" onclick="changeStatus('{{ account.auth_data.id }}', '{{ account.auth_data.status }}')">{{ account.auth_data.status.title() }}</button>
+                        <button class="btn-action on deactivate" onclick="changeStatus('{{ account.auth_info.id }}', '{{ account.auth_info.status }}')">{{ account.auth_info.status.title() }}</button>
                         <button class="btn-action delete" onclick="deleteUser('{{ account.id }}')">Delete</button>
                     </td>
                 </tr>

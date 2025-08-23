@@ -1,22 +1,30 @@
+"""
+Auth controller module.
+Defines HTTP endpoints for authentication operations (login).
+"""
 from datetime import timedelta
-from flask import Blueprint, request, jsonify, Response
+from flask import Blueprint, jsonify, Response
+from flask_jwt_extended import create_access_token
 from app.config.sqlmodel_config import db
 from app.services import AuthService
-from flask_jwt_extended import create_access_token
 from app.dtos.login_dto import LoginDto
+from app.decorators import parse_body
 
 auth_bl = Blueprint("auth", __name__, url_prefix="/auth")
 auth_service = AuthService()
 
 
 @auth_bl.post("/login")
-def login() -> tuple[Response, int]:
-    valited_model = LoginDto.model_validate(request.get_json())
-    account = auth_service.get_auth(valited_model.username, 
-                                 valited_model.password, db())
+@parse_body
+def login(dto: LoginDto) -> tuple[Response, int]:
+    """
+    Authenticate a user and return a JWT access token.
+    Returns:
+        tuple[Response, int]: The access token and user data as JSON, and HTTP status code 200.
+    """
+    account = auth_service.get_auth(dto.username, dto.password, db())
     token = create_access_token(
-        identity=account.id,
-        expires_delta=timedelta(days=2)
+        identity=account.id, expires_delta=timedelta(days=2)
     )
 
     return jsonify({

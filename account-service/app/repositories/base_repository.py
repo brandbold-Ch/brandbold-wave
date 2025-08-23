@@ -1,53 +1,100 @@
+from sqlmodel import select, update
 from typing import Any, Type, Optional
 from sqlalchemy import ScalarResult
 from sqlmodel import Session
 from app.abstract.abstract_crud import AbstractCrud, T
-from sqlmodel import select, update
-from app.decorators.handlers import exception_handler
 from app.utils.wrappers import ListWrapper
+from app.exceptions import NotFoundException
 
 
 class BaseRepository(AbstractCrud):
+    """
+    Base repository class providing generic CRUD operations for SQLModel models.
+    Implements methods for create, read, update, and delete, as well as conditional queries.
+    """
 
     def __init__(self, model: Type[T]) -> None:
+        """
+        Initialize the repository with a specific model class.
+        Args:
+            model (Type[T]): The SQLModel model class to operate on.
+        """
         self.model = model
+        
+    @property
+    def model_name(self) -> str:
+        return self.model.__name__
 
-    @exception_handler
     def create(
-            self,
-            model: T,
-            session: Session = None,
-            auto_commit: bool = True
+        self,
+        model: T,
+        session: Session = None,
+        auto_commit: bool = True
     ) -> T:
+        """
+        Add a new model instance to the database.
+        Args:
+            model (T): The model instance to add.
+            session (Session, optional): The database session.
+            auto_commit (bool, optional): Whether to commit after adding. Defaults to True.
+        Returns:
+            T: The created model instance.
+        """
         session.add(model)
         if auto_commit:
             session.commit()
             session.refresh(model)
         return model
     
-    @exception_handler
     def select(
-            self,
-            session: Session
+        self,
+        session: Session
     ) -> ListWrapper:
+        """
+        Retrieve all records of the model from the database.
+        Args:
+            session (Session): The database session.
+        Returns:
+            ListWrapper: A wrapper containing all model instances.
+        """
         data = list(session.exec(select(self.model)))
         return ListWrapper[self.model](data)
 
-    @exception_handler
     def get(
-            self,
-            _id: Any,
-            session: Session
+        self,
+        _id: Any,
+        session: Session
     ) -> Optional[T]:
-        return session.get(self.model, _id)
+        """
+        Retrieve a single model instance by its primary key.
+        Args:
+            _id (Any): The primary key value.
+            session (Session): The database session.
+        Returns:
+            Optional[T]: The model instance if found, else None.
+        """
+        result = session.get(self.model, _id)
+        if result is None:
+            raise NotFoundException(
+                f"{self.model_name} not found with ID {_id}"
+            )
+        return result
 
-    @exception_handler
     def delete(
-            self,
-            _id: Any,
-            session: Session,
-            auto_commit: bool = True
+        self,
+        _id: Any,
+        session: Session,
+        auto_commit: bool = True
     ) -> Optional[T]:
+        """
+        Delete a model instance by its primary key.
+        Args:
+            _id (Any): The primary key value.
+            session (Session): The database session.
+            auto_commit (bool, optional): Whether to commit after deleting. Defaults to True.
+        Returns:
+            Optional[T]: The deleted model instance if found, else None.
+        """
         result = self.get(_id, session)
         if result:
             session.delete(result)
@@ -55,14 +102,23 @@ class BaseRepository(AbstractCrud):
                 session.commit()
         return result
 
-    @exception_handler
     def update(
-            self,
-            _id: Any,
-            data: dict,
-            session: Session = None,
-            auto_commit: bool = True
+        self,
+        _id: Any,
+        data: dict,
+        session: Session = None,
+        auto_commit: bool = True
     ) -> Optional[T]:
+        """
+        Update a model instance by its primary key.
+        Args:
+            _id (Any): The primary key value.
+            data (dict): The data to update.
+            session (Session, optional): The database session.
+            auto_commit (bool, optional): Whether to commit after updating. Defaults to True.
+        Returns:
+            Optional[T]: The updated model instance if found, else None.
+        """
         result = self.get(_id, session)
         if result:
             result.fromkeys(**data)
@@ -72,13 +128,19 @@ class BaseRepository(AbstractCrud):
                 session.refresh(result)
         return result
         
-        
-    @exception_handler
     def fetch_by_condition(
-            self,
-            condition: bool,
-            session: Session
+        self,
+        condition: bool,
+        session: Session
     ) -> ScalarResult:
+        """
+        Fetch model instances matching a given condition.
+        Args:
+            condition (bool): The SQLAlchemy condition to filter by.
+            session (Session): The database session.
+        Returns:
+            ScalarResult: The result of the query.
+        """
         stmt = (
             select(self.model)
             .where(condition)
@@ -91,6 +153,15 @@ class BaseRepository(AbstractCrud):
         condition: bool, 
         session: Session
     ) -> ScalarResult:
+        """
+        Update model instances matching a given condition.
+        Args:
+            data (dict): The data to update.
+            condition (bool): The SQLAlchemy condition to filter by.
+            session (Session): The database session.
+        Returns:
+            ScalarResult: The result of the update query.
+        """
         smtp = (
             update(select.model)
             .where(condition)
@@ -98,31 +169,57 @@ class BaseRepository(AbstractCrud):
         )
         return session.exec(smtp)
 
-    @exception_handler
     def get_one(
-            self,
-            condition: bool,
-            session: Session
+        self,
+        condition: bool,
+        session: Session
     ) -> T:
-        result = self.fetch_by_condition(condition, session)
-        return result.first()
+        """
+        Retrieve the first model instance matching a condition.
+        Args:
+            condition (bool): The SQLAlchemy condition to filter by.
+            session (Session): The database session.
+        Returns:
+            T: The first matching model instance.
+        """
+        result = self.fetch_by_condition(condition, session).first()
+        if result is None:
+            raise NotFoundException(
+                f"{self.model_name} not found with condition {condition}"
+            )
+        return result
 
-    @exception_handler
     def get_many(
-            self,
-            condition: bool,
-            session: Session
+        self,
+        condition: bool,
+        session: Session
     ) -> ListWrapper:
+        """
+        Retrieve all model instances matching a condition.
+        Args:
+            condition (bool): The SQLAlchemy condition to filter by.
+            session (Session): The database session.
+        Returns:
+            ListWrapper: A wrapper containing all matching model instances.
+        """
         result = self.fetch_by_condition(condition, session)
         return ListWrapper[self.model](result.all())
 
-    @exception_handler
     def delete_one(
-            self,
-            condition: bool,
-            session: Session,
-            auto_commit: bool = True
+        self,
+        condition: bool,
+        session: Session,
+        auto_commit: bool = True
     ) -> Optional[T]:
+        """
+        Delete the first model instance matching a condition.
+        Args:
+            condition (bool): The SQLAlchemy condition to filter by.
+            session (Session): The database session.
+            auto_commit (bool, optional): Whether to commit after deleting. Defaults to True.
+        Returns:
+            Optional[T]: The deleted model instance if found, else None.
+        """
         result = self.get_one(condition, session)
         if result:
             session.delete(result)
@@ -130,13 +227,21 @@ class BaseRepository(AbstractCrud):
                 session.commit()
         return result
 
-    @exception_handler
     def delete_many(
-            self,
-            condition: bool,
-            session: Session,
-            auto_commit: bool = True
+        self,
+        condition: bool,
+        session: Session,
+        auto_commit: bool = True
     ) -> list[T]:
+        """
+        Delete all model instances matching a condition.
+        Args:
+            condition (bool): The SQLAlchemy condition to filter by.
+            session (Session): The database session.
+            auto_commit (bool, optional): Whether to commit after deleting. Defaults to True.
+        Returns:
+            list[T]: The list of deleted model instances.
+        """
         result = self.get_many(condition, session)
         for r in result:
             session.delete(r)
@@ -144,14 +249,23 @@ class BaseRepository(AbstractCrud):
             session.commit()
         return result
 
-    @exception_handler
     def update_one(
-            self,
-            condition: bool,
-            data: dict,
-            session: Session,
-            auto_commit: bool = True
+        self,
+        condition: bool,
+        data: dict,
+        session: Session,
+        auto_commit: bool = True
     ) -> Optional[T]:
+        """
+        Update the first model instance matching a condition.
+        Args:
+            condition (bool): The SQLAlchemy condition to filter by.
+            data (dict): The data to update.
+            session (Session): The database session.
+            auto_commit (bool, optional): Whether to commit after updating. Defaults to True.
+        Returns:
+            Optional[T]: The updated model instance if found, else None.
+        """
         result = self.get_one(condition, session)
         if result:
             result.fromkeys(**data)
