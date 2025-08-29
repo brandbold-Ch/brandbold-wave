@@ -6,8 +6,11 @@ Initializes the Flask app, configures JWT, CORS, error handlers, and registers b
 from flask_jwt_extended import JWTManager
 from flask_cors import CORS
 from flask import Flask, jsonify, Response, g, send_from_directory
-from app.api.v1 import admin_bl, device_bl, auth_bl, account_bl, profile_bl
-from app.exceptions.exceptions import (
+from src.web.views.admin_views import admin_bl
+from src.api.v1.controllers import (
+    device_bl, auth_bl, account_bl, profile_bl
+)
+from src.exceptions.exceptions import (
     BaseExceptionError,
     InvalidTokenException,
     ExpiredTokenException,
@@ -15,7 +18,7 @@ from app.exceptions.exceptions import (
 )
 
 app = Flask(
-    __name__, static_folder="app/web/static/images", static_url_path="/images"
+    __name__, static_folder="src/web/static/images", static_url_path="/images"
 )
 app.config['MAX_CONTENT_LENGTH'] = 7 * 1024 * 1024 * 1024
 app.config["SECRET_KEY"] = "my_secret"

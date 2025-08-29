@@ -2,10 +2,10 @@ import json
 import redis
 import logging
 import signal
-from app.config.sqlmodel_config import create_session
-from app.utils.settings import get_settings
-from app.orchestrators import ContentOrchestrator
-from app.dtos import CreateContentDto
+from src.config.sqlmodel_config import create_session
+from src.utils.settings import get_settings
+from src.api.v1.orchestrators import ContentOrchestrator
+from src.api.v1.dtos import CreateContentDto
 
 settings = get_settings()
 logger = logging.getLogger("worker")
